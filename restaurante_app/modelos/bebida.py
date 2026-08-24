@@ -20,7 +20,7 @@ class Bebida(Producto):
         # 2. Le agregamos la información específica de la Bebida
         datos["tipo_de_envase"] = self.tipo_de_envase
         
-        # Opcional pero recomendado: Añadir un "tipo" te ayudará al cargar el JSON
+        # Opcional pero recomendado: Añadir un "tipo" ayuda a cargar el JSON
         # para saber si debes reconstruir un Producto normal o una Bebida
         datos["tipo_producto"] = "Bebida" 
         
