@@ -4,86 +4,135 @@ Aplicación desarrollada en **Python** orientada a consola, diseñada bajo los p
 
 ## Información del Estudiante
 **Nombre Completo:** Marco Julio Alcívar Chiriboga 
-**Asignatura:** Programación Orientada a Objetos (Semana 8)
+**Asignatura:** Programación Orientada a Objetos
 **Institución:** Universidad Estatal Amazónica
 
-## Arquitectura y Estructura Modular
+# Sistema de Gestión de Restaurante "El Buen Sabor" (Semana 10)
 
-El proyecto se encuentra estrictamente modularizado para separar las responsabilidades de datos, lógica de negocio e interacción con el usuario:
+Proyecto académico en Python para practicar Programación Orientada a Objetos (POO), estructuras de datos, manejo de archivos JSON y manejo de excepciones.
+
+La aplicación administra productos, bebidas y clientes desde la consola. Los productos y bebidas se conservan en un archivo JSON para que sigan disponibles al cerrar y volver a ejecutar el programa.
+
+## Estructura del Proyecto
 
 ```text
 restaurante_app/
 |
-├── datos/
-│   └── productos.json         # Archivo físico para la persistencia de datos (JSON)
+|-- datos/
+|   `-- productos.json
 |
-├── modelos/
-│   ├── __init__.py        # Inicializador del paquete de modelos
-│   ├── producto.py        # Clase base para la gestión de productos generales
-│   ├── bebida.py          # Clase hija que hereda de Producto (Herencia y Polimorfismo)
-│   └── usuario.py         # Clase independiente para representar a los usuarios/clientes
+|-- modelos/
+|   |-- __init__.py
+|   |-- producto.py
+|   |-- bebida.py
+|   `-- cliente.py
 |
-├── servicios/
-│   ├── __init__.py        # Inicializador del paquete de servicios
-│   ├── archivo_servicio.py # Servicio responsable de la lectura y escritura del JSON
-│   └── restaurante.py     # Capa encargada de las colecciones en memoria y reglas de negocio
+|-- servicios/
+|   |-- __init__.py
+|   |-- archivo_servicio.py
+|   `-- restaurante_servicio.py
 |
-├── main.py                # Punto de arranque, menú interactivo y controlador principal
-└── README.md              # Documentación oficial y explicación de la arquitectura
+`-- main.py
+```
 
-Componentes y Principios Aplicados
-1. Modelos de Datos (modelos/)
-Producto (producto.py): Define la estructura base de los artículos del restaurante. Contiene atributos comunes como código, nombre, categoría y precio, además del método fundamental mostrar_informacion().
+La carpeta `datos/` no representa una nueva capa de la arquitectura. Solo es la ubicación física donde la aplicación guarda el archivo `productos.json`.
 
-Bebida (bebida.py): Aplica herencia al extender de la clase Producto. Incorpora un atributo propio (tipo_envase) y aplica polimorfismo al sobrescribir mostrar_informacion() para complementar los datos heredados sin alterar la lógica general (Principio de Sustitución de Liskov).
+## Ejecución
 
-Cliente (cliente.py): Modela la información personal del cliente (identificación, nombre y correo) manteniendo total independencia de la jerarquía de productos (Principio de Responsabilidad Única).
+Desde la carpeta `restaurante_app`, ejecutar:
 
-2. Capa de Servicios (servicios/)
-Restaurante (restaurante.py): Actúa como el motor logístico de la aplicación. Administra una colección unificada de productos (donde conviven objetos tipo Producto y Bebida de manera transparente) y una lista independiente de clientes.
+```bash
+python main.py
+```
 
-Incluye validaciones robustas para evitar duplicidad de códigos en productos/bebidas e identificaciones repetidas en los clientes.
+## Responsabilidades
 
-3. Interfaz de Usuario (main.py)
-Gestiona un bucle interactivo basado en consola impulsado por opciones numéricas (input()). Se encarga exclusivamente de capturar datos, instanciar objetos, invocar los métodos del servicio Restaurante y presentar los resultados formateados en pantalla.
+* `modelos/producto.py` : contiene la clase `Producto`, sus validaciones y la conversión simple a diccionario.
+* `modelos/bebida.py` : contiene la clase `Bebida` (heredada o específica de productos líquidos) y sus validaciones.
+* `modelos/cliente.py` : contiene la clase `Cliente` y sus validaciones principales.
+* `servicios/restaurante_servicio.py` : administra las colecciones de productos, bebidas, clientes y pedidos durante la ejecución.
+* `servicios/archivo_servicio.py` : lee y escribe los productos y bebidas en formato JSON usando `with open(...)`, `json.load()` y `json.dump()`.
+* `main.py` : contiene el menú de consola, crea los servicios, carga los datos iniciales y solicita el guardado cuando cambian los productos o bebidas.
 
-Principios SOLID Implementados
-S (Responsabilidad Única): Cada archivo y clase posee un propósito específico (las clases de modelos gestionan sus propios datos, el servicio administra colecciones y main.py maneja la interfaz).
+## Persistencia con JSON
 
-O (Abierto/Cerrado): La clase Bebida amplía el comportamiento del sistema mediante herencia y polimorfismo sin necesidad de reescribir la lógica central del servicio.
+Al iniciar la aplicación, `main.py` crea un `ArchivoServicio` y solicita la carga de `datos/productos.json`. Los diccionarios obtenidos desde el archivo se convierten nuevamente en objetos correspondientes, por lo que el resto del sistema sigue trabajando con objetos y no con diccionarios.
 
-L (Sustitución de Liskov): Los objetos de la clase derivada (Bebida) pueden utilizarse indistintamente en la colección de productos genéricos sin generar errores ni requerir validaciones repetitivas de tipo (isinstance).
+Cuando se registra, actualiza o elimina un producto o bebida, la lista actual de objetos se convierte en una lista de diccionarios y se guarda nuevamente en `productos.json`.
 
-# Semana 9
-## Aplicacion de Estructuras de Datos 
+Flujo principal:
+```text
+Inicio de la aplicacion
+|
+Leer datos/productos.json
+|
+Convertir diccionarios a objetos
+|
+Cargar objetos en RestauranteServicio
+|
+Ejecutar el menu de consola
+```
 
-| Estructura | Tipo en Python | Aplicacion en el Proyecto |
-| **Listas** | list | Utilizadas para administrar las colecciones dinámicas de productos (`self.productos) y clientes (`self.clientes`). permiten realizar operaciones de registro, busqueda, actualizacion, eliminacion y listado.|
-|**Tuplas** | `tuple` | Utilizadas para manejar informacion inmutable que debe mantenerse estable durante la ejecucion, como la tupla con la información general del negocio (nombre, RUC, direccion, teléfono) y las opciones fijas del menú.
-| **Diccionarios** | `dict` | Utilizados para establecer relaciones de clave $\rigtarrow$ valor. Se aplica para mapear las opciones numéricas del menú interactivo con sus respectivas funciones de la interfaz de usuario. |
-| **Conjuntos** | `set` | Utilizados para gestionar colecciones de elementos unicos sin duplicados. Se aplican en la funcion de obtencion de categorias para extraer y presentar unicamente las categorias unicas de los productosregistrados. | 
+Flujo de guardado:
+```text
+Operacion sobre productos/bebidas
+|
+RestauranteServicio modifica la lista en memoria
+|
+Los objetos se convierten a diccionarios
+|
+ArchivoServicio actualiza datos/productos.json
+```
 
-# Semana 10: Persistencia de Datos y Manejo de Excepciones
+## Manejo de fallos
 
-En esta etapa de desarrollo, el sistema evoluciona para incluir almacenamiento persistente mediante archivos JSON. Esto garantiza que el catálogo de productos y bebidas del restaurante "El Buen Sabor" no se pierda al cerrar la aplicación. Además, se incorpora un robusto manejo de excepciones para prevenir cierres inesperados.
+El proyecto mantiene `ValueError` para validaciones propias de los modelos, como campos vacíos.
 
-### Nuevos Componentes y Modificaciones
-* **`datos/productos.json`**: Archivo físico utilizado como medio de almacenamiento de la colección.
-* **`servicios/archivo_servicio.py`**: Nuevo módulo de servicio dedicado exclusivamente a la lectura (`json.load()`) y escritura (`json.dump()`) del archivo. Cumple con el Principio de Responsabilidad Única al separar la persistencia de la lógica de negocio.
-* **`modelos/producto.py` y `bebida.py`**: Se integró el método `a_diccionario()` para serializar los objetos a una estructura compatible con JSON, manteniendo intactos los atributos heredados (como el `tipo_de_envase`).
-* **`main.py` (Actualización de Interfaz)**:
-  * Se implementó una **tupla constante** (`INFO_RESTAURANTE`) que actúa como encabezado inmutable en la interfaz de consola, mostrando el nombre, RUC, dirección y teléfono.
-  * Se expandió el menú a 12 opciones utilizando un despachador dinámico basado en un diccionario y funciones `lambda`, optimizando el flujo de ejecución sin abusar de condicionales `if/elif`.
+En `ArchivoServicio` se manejan excepciones específicas relacionadas con archivos:
 
-### Manejo de Excepciones Implementado
-El acceso a archivos y la captura de datos están protegidos rigurosamente con bloques `try-except`:
-* **`FileNotFoundError`**: Permite que la aplicación inicie de manera controlada con una colección vacía si el archivo `productos.json` todavía no existe.
-* **`json.JSONDecodeError`**: Protege la inicialización en caso de que el archivo exista pero su formato interno esté corrupto o no sea un JSON válido.
-* **`PermissionError`**: Advierte al usuario de forma amigable si el sistema operativo deniega los permisos de lectura o escritura en el directorio `datos/`.
-* **`KeyError`**: Mantiene la estabilidad al reconstruir los objetos durante la fase de carga si algún registro antiguo no posee las claves esperadas.
-* **`ValueError`**: Empleado en los formularios de registro de la consola (ej. al pedir el precio) para impedir que el ingreso de letras o caracteres inválidos detenga la aplicación abruptamente.
+* `FileNotFoundError` : permite iniciar con una lista vacía cuando `productos.json` todavia no existe.
+* `json.JSONDecodeError` : informa cuando el archivo existe pero no contiene JSON válido.
+* `PermissionError` : informa cuando no existen permisos suficientes para leer o escribir el archivo.
 
-### Flujo de Ejecución (Carga y Guardado)
-1. **Inicio y Carga:** Al iniciar `main.py`, se crea el `ArchivoServicio` y se intenta leer los datos. Cada registro válido recuperado del JSON se utiliza para instanciar nuevamente objetos `Producto` o `Bebida`, los cuales se cargan en la memoria del `RestauranteServicio`.
-2. **Operación en Memoria:** El sistema interactúa con el usuario trabajando netamente con los objetos en memoria para garantizar un alto rendimiento.
-3. **Guardado Automático:** Inmediatamente después de que el usuario registra, actualiza o elimina un producto con éxito, `main.py` solicita la colección actualizada, los objetos se convierten a lista de diccionarios, y el servicio sobrescribe el archivo físico, manteniendo la información siempre sincronizada.
+No se utilizan librerías externas ni bases de datos. El objetivo de esta semana es observar una persistencia básica y comprensible usando archivos JSON.
+
+## Uso justificado de las estructuras de datos
+
+El proyecto utiliza `list`, `tuple`, `dict` y `set` en lugares donde cada estructura cumple una responsabilidad concreta dentro del sistema. No se reemplazan las clases por diccionarios, porque esas entidades siguen siendo objetos con atributos, propiedades y validaciones.
+
+### `list`: colecciones de productos, bebidas y clientes
+Se utiliza en `servicios/restaurante_servicio.py` para guardar los elementos mientras el programa está en ejecución:
+
+```python
+self.productos: list[Producto] = []
+self.bebidas: list[Bebida] = []
+self.clientes: list[Cliente] = []
+```
+
+La lista permite registrar, recorrer, buscar, actualizar, listar y eliminar objetos.
+
+### `tuple`: opciones fijas del menú
+Se utiliza en `main.py` para definir las opciones principales del menú. Es apropiado porque esas opciones no necesitan modificarse durante la ejecución.
+
+### `dict`: relación entre claves y valores
+Se utiliza en `main.py` para relacionar opciones del menú con funciones, y en `RestauranteServicio` para registrar temporalmente los pedidos durante la ejecución.
+
+### `set`: categorías sin duplicados
+Se utiliza para mostrar cada categoría de productos o bebidas una sola vez.
+
+## Menú principal
+
+El programa permite:
+1. Registrar producto 
+2. Registrar bebida
+3. Buscar producto o bebida
+4. Actualizar producto o bebida
+5. Eliminar producto o bebida
+6. Listar todos los productos 
+7. Registrar cliente (usuario)
+8. Buscar Cliente
+9. Actualizar Cliente
+10. Eliminar Cliente
+11. Listar Cliente
+0. Salir
+
